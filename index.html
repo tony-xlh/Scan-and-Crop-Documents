@@ -12,7 +12,6 @@
   <style>
     .scanner {
       display: flex;
-      flex-wrap: wrap;
     }
 
     .options {
@@ -124,6 +123,9 @@
     }
 
     @media screen and (max-device-width: 600px){
+      .scanner {
+        flex-wrap: wrap;
+      }
       .options {
         flex-basis: 100%;
       }
@@ -133,6 +135,14 @@
 
       .scanner {
         height: auto;
+      }
+
+      #dwtcontrolContainer {
+        height: 400px;
+      }
+
+      #cropper {
+        height: 400px;
       }
     }
   </style>
