@@ -157,7 +157,7 @@
             </label>
           </div>
           <div>
-            <a class="d-primary-btn fullwidth" style="padding-top:5px;padding-bottom:5px;">Scan</a>
+            <a onclick="scan();" class="d-primary-btn fullwidth" style="padding-top:5px;padding-bottom:5px;">Scan</a>
             <a class="d-secondary-btn fullwidth" style="margin-top:5px;">Import Local Image</a>
           </div>
         </div>
@@ -204,6 +204,23 @@
         let option = new Option(scanner.displayName,index);
         selScanners.appendChild(option);
       }
+    }
+
+    async function scan(){
+      const selectedIndex = document.getElementById("select-scanner").selectedIndex;
+      const options = {
+        IfShowUI:document.getElementById("showUI").checked,
+        PixelType:document.getElementById("select-pixeltype").selectedIndex,
+        Resolution:document.getElementById("select-resolution").selectedOptions[0].value,
+        IfFeederEnabled:document.getElementById("useADF").checked,
+        IfDuplexEnabled:document.getElementById("useDuplex").checked
+      };
+      console.log(options)
+      console.log(scanners[selectedIndex]);
+      await DWObject.SelectDeviceAsync(scanners[selectedIndex]);
+      await DWObject.OpenSourceAsync();
+      await DWObject.AcquireImageAsync(options);
+      await DWObject.CloseSourceAsync();
     }
   </script>
 </body>
