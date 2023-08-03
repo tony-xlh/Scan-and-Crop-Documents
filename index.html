@@ -57,12 +57,12 @@
       height: calc(100% - 16px);
     }
 
-    .section select {
+    .options select {
       width: 100%;
       height: 30px;
     }
 
-    .section div {
+    .options div {
       margin-bottom: 10px;
     }
 
@@ -94,8 +94,20 @@
       color: #fea543;
     }
 
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      height: 40px;
+    }
+
+    .actions .d-primary-btn {
+      padding: 5px 10px;
+      margin-right: 5px;
+    }
+
     #dwtcontrolContainer {
-      height: 100%;
+      height: calc(100% - 40px);
     }
 
     @media screen and (max-device-width: 600px){
@@ -173,6 +185,18 @@
       <div class="viewer">
         <div class="section" >
           <div id="dwtcontrolContainer"></div>
+          <div class="actions">
+            <a class="d-primary-btn">Crop</a>
+            <a class="d-primary-btn">Save</a>
+            <label>
+              Output Format:
+              <select id="select-format">
+                <option>PDF</option>
+                <option>JPG</option>
+                <option>PNG</option>
+              </select>
+            </label>
+          </div>
         </div>
       </div>
     </div>
