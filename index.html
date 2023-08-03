@@ -187,7 +187,7 @@
           <div id="dwtcontrolContainer"></div>
           <div class="actions">
             <a class="d-primary-btn">Crop</a>
-            <a class="d-primary-btn">Save</a>
+            <a class="d-primary-btn" onclick="save();">Save</a>
             <label>
               Output Format:
               <select id="select-format">
@@ -258,6 +258,23 @@
       await DWObject.OpenSourceAsync();
       await DWObject.AcquireImageAsync(options);
       await DWObject.CloseSourceAsync();
+    }
+
+    function save(){
+      let selectedIndex = document.getElementById("select-format").selectedIndex;
+      const onSuccess = () => {
+        alert("Saved");
+      };
+      const onError = (errorCode,errorString) => {
+        alert(errorString);
+      };
+      if (selectedIndex === 0) {
+        DWObject.SaveAllAsPDF("Scanned.pdf",onSuccess,onError);
+      }else if (selectedIndex === 1) {
+        DWObject.SaveAsJPEG("Scanned.jpg", DWObject.CurrentImageIndexInBuffer,onSuccess,onError);
+      }else if (selectedIndex === 2) {
+        DWObject.SaveAsPNG("Scanned.png", DWObject.CurrentImageIndexInBuffer,onSuccess,onError);
+      }
     }
   </script>
 </body>
