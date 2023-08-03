@@ -62,7 +62,7 @@
       margin-bottom: 10px;
     }
 
-    .d-btn {
+    .d-primary-btn {
       display: inline-block;
       background-color: #fe8e14;
       color: #fff;
@@ -72,7 +72,7 @@
       font-family: "sans-serif"
     }
 
-    .d-btn:hover {
+    .d-primary-btn:hover {
       box-shadow:-4px 4px #000;
       transform: translate(4px,-4px)
     }
@@ -136,7 +136,7 @@
             </label>
           </div>
           <div>
-            <a class="d-btn fullwidth" style="padding-top:5px;padding-bottom:5px;">Scan</a>
+            <a class="d-primary-btn fullwidth" style="padding-top:5px;padding-bottom:5px;">Scan</a>
           </div>
         </div>
       </div>
@@ -148,6 +148,27 @@
     </div>
   </div>
   <script type="text/javascript">
+    let DWObject;
+    Dynamsoft.DWT.AutoLoad = false;
+    Dynamsoft.DWT.Containers = [];
+    Dynamsoft.DWT.ResourcesPath = "https://unpkg.com/dwt@18.3.0/dist";
+    Dynamsoft.DWT.ProductKey = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ=="; //one-day trial
+
+    init();
+
+    function init(){
+      Dynamsoft.DWT.CreateDWTObjectEx(
+        {
+          WebTwainId: 'dwtcontrol'
+        },
+        function(obj) {
+          DWObject = obj;
+        },
+        function(err) {
+          console.log(err);
+        }
+      );
+    }
   </script>
 </body>
 </html>
