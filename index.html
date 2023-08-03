@@ -124,14 +124,18 @@
               <select id="select-resolution">
                 <option value="100">100</option>
                 <option value="200">200</option>
-                <option value="300">300</option>
+                <option value="300" selected>300</option>
               </select>
             </label>
           </div>
           <div>
             <label>
               Pixel Type:
-              <select id="select-pixeltype"></select>
+              <select id="select-pixeltype">
+                <option>Black & White</option>
+                <option>Gray</option>
+                <option selected>Color</option>
+              </select>
             </label>
           </div>
           <div>
@@ -176,7 +180,6 @@
     init();
 
     function init(){
-      document.getElementById("select-resolution").selectedIndex = 2;
       Dynamsoft.DWT.CreateDWTObjectEx(
         {
           WebTwainId: 'dwtcontrol'
