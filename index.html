@@ -163,6 +163,7 @@
   </div>
   <script type="text/javascript">
     let DWObject;
+    let scanners = [];
     Dynamsoft.DWT.AutoLoad = false;
     Dynamsoft.DWT.Containers = [];
     Dynamsoft.DWT.ResourcesPath = "https://unpkg.com/dwt@18.3.0/dist";
@@ -177,11 +178,24 @@
         },
         function(obj) {
           DWObject = obj;
+          loadScanners();
         },
         function(err) {
           console.log(err);
         }
       );
+    }
+
+    async function loadScanners(){
+      scanners = await DWObject.GetDevicesAsync();
+      console.log(scanners);
+      let selScanners = document.getElementById("select-scanner");
+      selScanners.innerHTML = "";
+      for (let index = 0; index < scanners.length; index++) {
+        const scanner = scanners[index];
+        let option = new Option(scanner.displayName,index);
+        selScanners.appendChild(option);
+      }
     }
   </script>
 </body>
