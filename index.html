@@ -3,6 +3,10 @@
 <head>
   <title>Scan and Crop Documents</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
+  <script type="module">
+    import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/image-cropper-component/dist/esm/loader.js';
+    defineCustomElements();
+  </script>
   <script src="https://unpkg.com/dwt@18.3.0/dist/dynamsoft.webtwain.min.js"></script>
   <style>
     .scanner {
@@ -110,6 +114,12 @@
       height: calc(100% - 40px);
     }
 
+    #cropper {
+      display: none;
+      height: calc(100% - 40px);
+      position: relative;
+    }
+
     @media screen and (max-device-width: 600px){
       .options {
         flex-basis: 100%;
@@ -185,8 +195,11 @@
       <div class="viewer">
         <div class="section" >
           <div id="dwtcontrolContainer"></div>
+          <div id="cropper">
+            <image-cropper style="--line-color:orange;"></image-cropper>
+          </div>
           <div class="actions">
-            <a class="d-primary-btn">Crop</a>
+            <a class="d-primary-btn" onclick="showCropper();">Crop</a>
             <a class="d-primary-btn" onclick="save();">Save</a>
             <label>
               Output Format:
@@ -272,6 +285,35 @@
           alert(errorString);
         }
       );
+    }
+
+    async function showCropper(){
+      const imageCropper = document.querySelector("image-cropper");
+      document.getElementById("cropper").style.display = "block";
+      document.getElementById("dwtcontrolContainer").style.display = "none";
+      const base64 = await convertToBase64EncodedPNG();
+      const dataURL = "data:image/png;base64," + base64;
+      const img = document.createElement("img");
+      img.onload = function(){
+        imageCropper.img = img;
+      }
+      img.src = dataURL;
+    }
+
+    async function convertToBase64EncodedPNG(){
+      return new Promise((resolve, reject) => {
+        DWObject.ConvertToBase64(
+          [DWObject.CurrentImageIndexInBuffer],
+          Dynamsoft.DWT.EnumDWT_ImageType.IT_PNG,
+          function (result, indices, type) {
+            resolve(result.getData(0, result.getLength()));
+          },
+          function (errorCode, errorString) {
+            reject(errorString);
+          }
+        );  
+      })
+      
     }
 
     function save(){
