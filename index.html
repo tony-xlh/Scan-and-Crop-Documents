@@ -178,7 +178,7 @@
           </div>
           <div>
             <a onclick="scan();" class="d-primary-btn fullwidth" style="padding-top:5px;padding-bottom:5px;">Scan</a>
-            <a class="d-secondary-btn fullwidth" style="margin-top:5px;">Import Local Image</a>
+            <a onclick="loadImages();" class="d-secondary-btn fullwidth" style="margin-top:5px;">Import Local Image</a>
           </div>
         </div>
       </div>
@@ -258,6 +258,20 @@
       await DWObject.OpenSourceAsync();
       await DWObject.AcquireImageAsync(options);
       await DWObject.CloseSourceAsync();
+    }
+
+    function loadImages(){
+      DWObject.IfShowFileDialog = true; //"Open File" dialog will be opened.
+      DWObject.LoadImageEx(
+        "", //file name can be empty if "Open File" dialog is called.
+        Dynamsoft.DWT.EnumDWT_ImageType.IT_ALL,
+        function () {
+          console.log("success");
+        },
+        function (errorCode, errorString) {
+          alert(errorString);
+        }
+      );
     }
 
     function save(){
