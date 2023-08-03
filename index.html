@@ -7,15 +7,18 @@
     import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/image-cropper-component/dist/esm/loader.js';
     defineCustomElements();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-normalizer@1.0.12/dist/ddn.js"></script>
   <script src="https://unpkg.com/dwt@18.3.0/dist/dynamsoft.webtwain.min.js"></script>
   <style>
     .scanner {
       display: flex;
       flex-wrap: wrap;
     }
+
     .options {
       flex-basis: 30%;
     }
+
     .viewer {
       flex-basis: 70%;
     }
@@ -221,7 +224,8 @@
     Dynamsoft.DWT.Containers = [];
     Dynamsoft.DWT.ResourcesPath = "https://unpkg.com/dwt@18.3.0/dist";
     Dynamsoft.DWT.ProductKey = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ=="; //one-day trial
-
+   
+    setupCropper();
     init();
 
     function init(){
@@ -287,18 +291,96 @@
       );
     }
 
+    function setupCropper(){
+      const imageCropper = document.querySelector("image-cropper");
+      const canceled = () => {
+        document.getElementById("cropper").style.display = "none";
+        document.getElementById("dwtcontrolContainer").style.display = "";
+      }
+
+      const confirmed = async () => {
+        document.getElementById("cropper").style.display = "none";
+        document.getElementById("dwtcontrolContainer").style.display = "";
+        const selections = await imageCropper.getAllSelections();
+        if (selections.length>0) {
+          DWObject.RemoveAllSelectedImages();
+        }
+        for (let index = 0; index < selections.length; index++) {
+          const selection = selections[index];
+          let croppedImage = await imageCropper.getCroppedImage({selection:selection,perspectiveTransform:true,colorMode:"color"});
+          await loadImageFromDataURL(croppedImage);
+        } 
+      }
+
+      const selectionClicked = async (e) => {
+        const index = e.detail;
+        let selections = await imageCropper.getAllSelections();
+        let selectedSelection = selections[index];
+        if ("width" in selectedSelection) {
+          imageCropper.rect = selectedSelection;
+        }else{
+          imageCropper.quad = selectedSelection;
+        }
+        selections.splice(index,1);
+        imageCropper.inactiveSelections = selections;
+      }
+
+      imageCropper.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+      imageCropper.addEventListener("canceled",canceled);
+      imageCropper.addEventListener("confirmed",confirmed);
+      imageCropper.addEventListener("selectionClicked",selectionClicked)
+    }
+
+    function loadImageFromDataURL(dataURL){
+      return new Promise((resolve, reject) => {
+        DWObject.LoadImageFromBase64Binary(
+          removeDataURLHead(dataURL),
+          Dynamsoft.DWT.EnumDWT_ImageType.IT_PNG,
+          function(){
+            resolve();
+          },
+          function(errorCode,errorString){
+            reject(errorString);
+          }
+        )
+      })
+    }
+
+    function removeDataURLHead(dataURL){
+      return dataURL.substring(dataURL.indexOf(",")+1,dataURL.length);
+    }
+
+
     async function showCropper(){
       const imageCropper = document.querySelector("image-cropper");
+      imageCropper.inactiveSelections = [];
       document.getElementById("cropper").style.display = "block";
       document.getElementById("dwtcontrolContainer").style.display = "none";
       const base64 = await convertToBase64EncodedPNG();
       const dataURL = "data:image/png;base64," + base64;
       const img = document.createElement("img");
-      img.onload = function(){
+      img.onload = async function(){
         imageCropper.img = img;
+        const template = "{\"GlobalParameter\": {\"MaxTotalImageDimension\": 0,\"Name\": \"DM_Defaut_GlobalParameter\"},\"ImageParameterArray\": [{\"BaseImageParameterName\": \"\",\"BinarizationModes\": [{\"BlockSizeX\": 7,\"BlockSizeY\": 7,\"EnableFillBinaryVacancy\": 0,\"GrayscaleEnhancementModesIndex\": -1,\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"BM_LOCAL_BLOCK\",\"MorphOperation\": \"Close\",\"MorphOperationKernelSizeX\": 3,\"MorphOperationKernelSizeY\": 3,\"MorphShape\": \"Rectangle\",\"ThresholdCompensation\": 5}],\"ColourChannelUsageType\": \"CCUT_AUTO\",\"ColourConversionModes\": [{\"BlueChannelWeight\": -1,\"GreenChannelWeight\": -1,\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"CICM_GENERAL\",\"RedChannelWeight\": -1}],\"GrayscaleEnhancementModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"GEM_SHARPEN_SMOOTH\",\"SharpenBlockSizeX\": 3,\"SharpenBlockSizeY\": 3,\"SmoothBlockSizeX\": 3,\"SmoothBlockSizeY\": 3}],\"GrayscaleTransformationModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"GTM_ORIGINAL\"}],\"LineExtractionModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"LEM_GENERAL\"}],\"MaxThreadCount\": 4,\"Name\": \"DM_Defaut_ImageParameter\",\"NormalizerParameterName\": \"NormalizerParameter\",\"RegionPredetectionModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"RPM_GENERAL\"}],\"ScaleDownThreshold\": 512,\"TextFilterModes\": [{\"IfEraseTextZone\": 0,\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"MinImageDimension\": 65536,\"Mode\": \"TFM_GENERAL_CONTOUR\",\"Sensitivity\": 0}],\"TextureDetectionModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"TDM_GENERAL_WIDTH_CONCENTRATION\",\"Sensitivity\": 5}],\"Timeout\": 10000}],\"NormalizerParameterArray\": [{\"Brightness\": 0,\"ColourMode\": \"ICM_COLOUR\",\"ContentType\": \"CT_DOCUMENT\",\"Contrast\": 0,\"DeskewMode\": {\"ContentDirection\": 0,\"Mode\": \"DM_PERSPECTIVE_CORRECTION\"},\"InteriorAngleRangeArray\": [{\"MaxValue\": 110,\"MinValue\": 70}],\"Name\": \"NormalizerParameter\",\"PageSize\": [-1,-1],\"QuadrilateralDetectionModes\": [{\"Mode\": \"QDM_GENERAL\"}]}]}";
+        quads = await imageCropper.detect(img,template);
+        if (quads.length>0) {
+          imageCropper.quad = quads[0].location;
+          if (quads.length>1) {
+            let inactiveSelections = [];
+            for (let index = 1; index < quads.length; index++) {
+              const quad = quads[index];
+              inactiveSelections.push(quad.location);
+            }
+            imageCropper.inactiveSelections = inactiveSelections;
+          }
+        }else{
+          imageCropper.quad = {points:[{x:50,y:50},{x:250,y:50},{x:250,y:250},{x:50,y:250}]};
+        }
       }
       img.src = dataURL;
     }
+
+
 
     async function convertToBase64EncodedPNG(){
       return new Promise((resolve, reject) => {
