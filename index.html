@@ -122,6 +122,14 @@
       position: relative;
     }
 
+    #cropperContainer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
+
     @media screen and (max-device-width: 600px){
       .scanner {
         flex-wrap: wrap;
@@ -209,7 +217,9 @@
         <div class="section" >
           <div id="dwtcontrolContainer"></div>
           <div id="cropper">
-            <image-cropper style="--line-color:orange;"></image-cropper>
+            <div id="cropperContainer">
+              <image-cropper style="--line-color:orange;"></image-cropper>
+            </div>
           </div>
           <div class="actions">
             <a class="d-primary-btn" onclick="showCropper();">Crop</a>
