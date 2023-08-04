@@ -211,6 +211,7 @@
             <image-cropper style="--line-color:orange;"></image-cropper>
           </div>
           <div class="actions">
+            <a class="d-primary-btn" onclick="showEditor();">Edit</a>
             <a class="d-primary-btn" onclick="showCropper();">Crop</a>
             <a class="d-primary-btn" onclick="save();">Save</a>
             <label>
@@ -359,6 +360,10 @@
       return dataURL.substring(dataURL.indexOf(",")+1,dataURL.length);
     }
 
+    function showEditor(){
+      let imageEditor = DWObject.Viewer.createImageEditor();
+      imageEditor.show();
+    }
 
     async function showCropper(){
       const imageCropper = document.querySelector("image-cropper");
