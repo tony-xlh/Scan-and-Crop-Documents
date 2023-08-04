@@ -4,7 +4,7 @@
   <title>Scan and Crop Documents</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
   <script type="module">
-    import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/image-cropper-component/dist/esm/loader.js';
+    import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/image-cropper-component@1.1.0/dist/esm/loader.js';
     defineCustomElements();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-normalizer@1.0.12/dist/ddn.js"></script>
@@ -119,15 +119,6 @@
     #cropper {
       display: none;
       height: calc(100% - 40px);
-      position: relative;
-    }
-
-    #cropperContainer {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
     }
 
     @media screen and (max-device-width: 600px){
@@ -217,9 +208,7 @@
         <div class="section" >
           <div id="dwtcontrolContainer"></div>
           <div id="cropper">
-            <div id="cropperContainer">
-              <image-cropper style="--line-color:orange;"></image-cropper>
-            </div>
+            <image-cropper style="--line-color:orange;"></image-cropper>
           </div>
           <div class="actions">
             <a class="d-primary-btn" onclick="showCropper();">Crop</a>
