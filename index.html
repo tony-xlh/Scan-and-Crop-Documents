@@ -4,7 +4,7 @@
   <title>Scan and Crop Documents</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" />
   <script type="module">
-    import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/image-cropper-component@1.3.0/dist/esm/loader.js';
+    import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/image-cropper-component@1.3.1/dist/esm/loader.js';
     defineCustomElements();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-normalizer@1.0.12/dist/ddn.js"></script>
@@ -216,6 +216,7 @@
           <div class="actions">
             <a class="d-primary-btn" onclick="showEditor();">Edit</a>
             <a class="d-primary-btn" onclick="showCropper();">Crop</a>
+            <a class="d-primary-btn" onclick="autoCrop();">Auto Crop All</a>
             <a class="d-primary-btn" onclick="save();">Save</a>
             <label>
               Output Format:
@@ -397,7 +398,37 @@
       img.src = dataURL;
     }
 
+    async function autoCrop(){
+      const imageCropper = document.querySelector("image-cropper");
+      for (let i = DWObject.HowManyImagesInBuffer - 1; i >= 0; i--) {
+        const blob = await convertToBlob(i);
+        const template = "{\"GlobalParameter\": {\"MaxTotalImageDimension\": 0,\"Name\": \"DM_Defaut_GlobalParameter\"},\"ImageParameterArray\": [{\"BaseImageParameterName\": \"\",\"BinarizationModes\": [{\"BlockSizeX\": 7,\"BlockSizeY\": 7,\"EnableFillBinaryVacancy\": 0,\"GrayscaleEnhancementModesIndex\": -1,\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"BM_LOCAL_BLOCK\",\"MorphOperation\": \"Close\",\"MorphOperationKernelSizeX\": 3,\"MorphOperationKernelSizeY\": 3,\"MorphShape\": \"Rectangle\",\"ThresholdCompensation\": 5}],\"ColourChannelUsageType\": \"CCUT_AUTO\",\"ColourConversionModes\": [{\"BlueChannelWeight\": -1,\"GreenChannelWeight\": -1,\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"CICM_GENERAL\",\"RedChannelWeight\": -1}],\"GrayscaleEnhancementModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"GEM_SHARPEN_SMOOTH\",\"SharpenBlockSizeX\": 3,\"SharpenBlockSizeY\": 3,\"SmoothBlockSizeX\": 3,\"SmoothBlockSizeY\": 3}],\"GrayscaleTransformationModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"GTM_ORIGINAL\"}],\"LineExtractionModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"LEM_GENERAL\"}],\"MaxThreadCount\": 4,\"Name\": \"DM_Defaut_ImageParameter\",\"NormalizerParameterName\": \"NormalizerParameter\",\"RegionPredetectionModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"RPM_GENERAL\"}],\"ScaleDownThreshold\": 512,\"TextFilterModes\": [{\"IfEraseTextZone\": 0,\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"MinImageDimension\": 65536,\"Mode\": \"TFM_GENERAL_CONTOUR\",\"Sensitivity\": 0}],\"TextureDetectionModes\": [{\"LibraryFileName\": \"\",\"LibraryParameters\": \"\",\"Mode\": \"TDM_GENERAL_WIDTH_CONCENTRATION\",\"Sensitivity\": 5}],\"Timeout\": 10000}],\"NormalizerParameterArray\": [{\"Brightness\": 0,\"ColourMode\": \"ICM_COLOUR\",\"ContentType\": \"CT_DOCUMENT\",\"Contrast\": 0,\"DeskewMode\": {\"ContentDirection\": 0,\"Mode\": \"DM_PERSPECTIVE_CORRECTION\"},\"InteriorAngleRangeArray\": [{\"MaxValue\": 110,\"MinValue\": 70}],\"Name\": \"NormalizerParameter\",\"PageSize\": [-1,-1],\"QuadrilateralDetectionModes\": [{\"Mode\": \"QDM_GENERAL\"}]}]}";
+        const quads = await imageCropper.detect(blob,template);
+        if (quads.length > 0) {
+          DWObject.RemoveImage(i);
+          for (let j = 0; j < quads.length; j++) {
+            const quad = quads[j];
+            let croppedImage = await imageCropper.getCroppedImage({source:blob,selection:quad.location,perspectiveTransform:true,colorMode:"color"});
+            await loadImageFromDataURL(croppedImage);
+          }
+        }
+      }
+    }
 
+    async function convertToBlob(index){
+      return new Promise((resolve, reject) => {
+        DWObject.ConvertToBlob(
+          [index],
+          Dynamsoft.DWT.EnumDWT_ImageType.IT_PNG,
+          function (result, indices, type) {
+            resolve(result);
+          },
+          function (errorCode, errorString) {
+            reject(errorString);
+          }
+        );  
+      })
+    }
 
     async function convertToBase64EncodedPNG(){
       return new Promise((resolve, reject) => {
@@ -412,7 +443,6 @@
           }
         );  
       })
-      
     }
 
     function save(){
